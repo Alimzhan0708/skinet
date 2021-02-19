@@ -1,34 +1,38 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Dtos;
+using AutoMapper;
 using Core.Entities;
-using Infrastructure.Data;
+using Core.Interfaces;
+using Core.Specifications;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseApiController
     {
-        private readonly StoreContext _context;
-        public ProductsController(StoreContext context)
+        private readonly IGenericRepository<Product> _productsRepo;
+        private readonly IMapper _mapper;
+        public ProductsController(IGenericRepository<Product> productsRepo, IMapper mapper)
         {
-            _context = context;
-
+            _mapper = mapper;
+            _productsRepo = productsRepo;
         }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<IEnumerable<ProductToReturnDto>> GetProducts([FromQuery] ProductSpecParams productSpecParams)
         {
-            var products = await _context.Products.ToListAsync();
-            return Ok(products);
+            var spec = new ProductsWithTypesAndBrandsSpecification(productSpecParams);
+            var products = await _productsRepo.GetAllWithSpec(spec);
+            return _mapper.Map<IEnumerable<ProductToReturnDto>>(products);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ProductToReturnDto> GetProduct(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
-            return Ok(product);
+            var spec = new ProductWithTypeAndBrandSpecification(id);
+            var product = await _productsRepo.GetEntityWithSpec(spec);
+            return _mapper.Map<ProductToReturnDto>(product);
         }
     }
 }
