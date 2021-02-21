@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using API.Errors;
 using API.Extensions;
+using StackExchange.Redis;
 
 namespace API
 {
@@ -32,10 +33,18 @@ namespace API
             services.AddApplicationServices();
             services.AddControllers();
             services.AddDbContext<StoreContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddSingleton<ConnectionMultiplexer>(config => 
+                {
+                    var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("Redis"), true);
+                    return ConnectionMultiplexer.Connect(configuration);
+                });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+
             services.AddCors(opt =>
             {
                 opt.AddPolicy("CorsPolicy", policy =>
