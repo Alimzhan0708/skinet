@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Errors;
 using API.Helpers;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -38,10 +40,13 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ProductToReturnDto> GetProduct(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
         {
             var spec = new ProductWithTypeAndBrandSpecification(id);
             var product = await _productsRepo.GetEntityWithSpec(spec);
+            if (product is null) return NotFound();
             return _mapper.Map<ProductToReturnDto>(product);
         }
 

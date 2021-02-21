@@ -27,9 +27,8 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IProductRepository, ProductRepository>();
             services.AddAutoMapper(typeof(MappingProfiles));
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddApplicationServices();
             services.AddControllers();
             services.AddDbContext<StoreContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddSwaggerGen(c =>
@@ -42,24 +41,6 @@ namespace API
                 {
                     policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200");
                 });
-            });
-            services.Configure<ApiBehaviorOptions>(options => 
-            {
-                options.InvalidModelStateResponseFactory = ActionContext => 
-                {
-                    var errors = ActionContext.ModelState
-                        .Where(e => e.Value.Errors.Count > 0)
-                        .SelectMany(x => x.Value.Errors)
-                        .Select(x => x.ErrorMessage)
-                        .ToArray();
-
-                    var errorResponse = new ApiValidationErrorResponse
-                    {
-                        Errors = errors
-                    };
-
-                    return new BadRequestObjectResult(errorResponse);
-                };
             });
         }
 
@@ -79,6 +60,9 @@ namespace API
             app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"); });
 
             app.UseEndpoints(endpoints =>
             {
