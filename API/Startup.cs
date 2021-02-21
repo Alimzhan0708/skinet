@@ -12,6 +12,7 @@ using API.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using API.Errors;
+using API.Extensions;
 
 namespace API
 {
