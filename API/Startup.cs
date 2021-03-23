@@ -3,17 +3,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Infrastructure.Data;
-using Core.Interfaces;
 using API.Helpers;
 using API.Middlewares;
-using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using API.Errors;
 using API.Extensions;
 using StackExchange.Redis;
+using Infrastructure.Identity;
 
 namespace API
 {
@@ -32,9 +28,15 @@ namespace API
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddApplicationServices();
             services.AddControllers();
-            services.AddDbContext<StoreContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddSingleton<ConnectionMultiplexer>(config => 
+            services.AddDbContext<StoreContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<AppIdentityDbContext>(options => 
+            {
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+
+            services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(config =>
                 {
                     var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("Redis"), true);
                     return ConnectionMultiplexer.Connect(configuration);
