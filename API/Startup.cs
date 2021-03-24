@@ -15,12 +15,12 @@ namespace API
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -29,22 +29,22 @@ namespace API
             services.AddApplicationServices();
             services.AddControllers();
 
-            services.AddDbContext<StoreContext>(options => options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<StoreContext>(options => options.UseSqlite(_configuration.GetConnectionString("DefaultConnection")));
             services.AddDbContext<AppIdentityDbContext>(options => 
             {
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlite(_configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddDbContext<AppIdentityDbContext>(options => 
             {
-                options.UseSqlite(Configuration.GetConnectionString("IdentityConnection"));
+                options.UseSqlite(_configuration.GetConnectionString("IdentityConnection"));
             });
-            services.AddIdentityServices();
+            services.AddIdentityServices(_configuration);
 
 
             services.AddSingleton<IConnectionMultiplexer>(config =>
                 {
-                    var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("Redis"), true);
+                    var configuration = ConfigurationOptions.Parse(_configuration.GetConnectionString("Redis"), true);
                     return ConnectionMultiplexer.Connect(configuration);
                 });
 
@@ -76,6 +76,8 @@ namespace API
             app.UseStaticFiles();
 
             app.UseCors("CorsPolicy");
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

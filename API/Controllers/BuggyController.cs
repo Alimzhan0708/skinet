@@ -1,5 +1,6 @@
 using API.Errors;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -24,6 +25,13 @@ namespace API.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("testauth")]
+        public ActionResult Authorize()
+        {
+            return Ok("Super secret");
         }
 
         [HttpGet("servererror")]
