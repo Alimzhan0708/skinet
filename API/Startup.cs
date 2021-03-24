@@ -35,8 +35,14 @@ namespace API
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddDbContext<AppIdentityDbContext>(options => 
+            {
+                options.UseSqlite(Configuration.GetConnectionString("IdentityConnection"));
+            });
+            services.AddIdentityServices();
 
-            services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(config =>
+
+            services.AddSingleton<IConnectionMultiplexer>(config =>
                 {
                     var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("Redis"), true);
                     return ConnectionMultiplexer.Connect(configuration);
