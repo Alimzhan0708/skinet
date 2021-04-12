@@ -4,10 +4,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": false,
-    "strict": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
@@ -20,10 +16,5 @@
       "es2018",
       "dom"
     ]
-  },
-  "angularCompilerOptions": {
-    "strictInjectionParameters": false,
-    "strictInputAccessModifiers": false,
-    "strictTemplates": false
   }
 }
